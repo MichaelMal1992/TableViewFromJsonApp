@@ -14,6 +14,8 @@
 		907D7E7F2A3B389700315F16 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 907D7E7D2A3B389700315F16 /* Main.storyboard */; };
 		907D7E812A3B389900315F16 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 907D7E802A3B389900315F16 /* Assets.xcassets */; };
 		907D7E842A3B389900315F16 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 907D7E822A3B389900315F16 /* LaunchScreen.storyboard */; };
+		90E358872A3B54F700776841 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E358862A3B54F700776841 /* NetworkManager.swift */; };
+		90E3588A2A3B6E5C00776841 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E358892A3B6E5C00776841 /* Constants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +29,8 @@
 		907D7E802A3B389900315F16 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		907D7E832A3B389900315F16 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		907D7E852A3B389900315F16 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		90E358862A3B54F700776841 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
+		90E358892A3B6E5C00776841 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		A26D6611EBFC02256DBDF2DA /* Pods-TestTableViewFromJsonApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TestTableViewFromJsonApp.debug.xcconfig"; path = "Target Support Files/Pods-TestTableViewFromJsonApp/Pods-TestTableViewFromJsonApp.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -48,7 +52,6 @@
 				A26D6611EBFC02256DBDF2DA /* Pods-TestTableViewFromJsonApp.debug.xcconfig */,
 				76BB3714EC712F873824FFCC /* Pods-TestTableViewFromJsonApp.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -73,15 +76,41 @@
 		907D7E762A3B389700315F16 /* TestTableViewFromJsonApp */ = {
 			isa = PBXGroup;
 			children = (
-				907D7E772A3B389700315F16 /* AppDelegate.swift */,
-				907D7E792A3B389700315F16 /* SceneDelegate.swift */,
+				90E358882A3B6DD900776841 /* Common */,
+				90E358852A3B540600776841 /* Delegates */,
+				90E358842A3B53E900776841 /* Managers */,
+				907D7E802A3B389900315F16 /* Assets.xcassets */,
 				907D7E7B2A3B389700315F16 /* ViewController.swift */,
 				907D7E7D2A3B389700315F16 /* Main.storyboard */,
-				907D7E802A3B389900315F16 /* Assets.xcassets */,
 				907D7E822A3B389900315F16 /* LaunchScreen.storyboard */,
 				907D7E852A3B389900315F16 /* Info.plist */,
 			);
 			path = TestTableViewFromJsonApp;
+			sourceTree = "<group>";
+		};
+		90E358842A3B53E900776841 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				90E358862A3B54F700776841 /* NetworkManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		90E358852A3B540600776841 /* Delegates */ = {
+			isa = PBXGroup;
+			children = (
+				907D7E792A3B389700315F16 /* SceneDelegate.swift */,
+				907D7E772A3B389700315F16 /* AppDelegate.swift */,
+			);
+			path = Delegates;
+			sourceTree = "<group>";
+		};
+		90E358882A3B6DD900776841 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				90E358892A3B6E5C00776841 /* Constants.swift */,
+			);
+			path = Common;
 			sourceTree = "<group>";
 		};
 		9B921CBD2F2CE277EA6433C3 /* Frameworks */ = {
@@ -207,8 +236,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				90E3588A2A3B6E5C00776841 /* Constants.swift in Sources */,
 				907D7E7C2A3B389700315F16 /* ViewController.swift in Sources */,
 				907D7E782A3B389700315F16 /* AppDelegate.swift in Sources */,
+				90E358872A3B54F700776841 /* NetworkManager.swift in Sources */,
 				907D7E7A2A3B389700315F16 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
