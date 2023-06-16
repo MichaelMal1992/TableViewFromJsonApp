@@ -22,6 +22,7 @@ class MainViewModel {
     let isHiddenNoDataLabel = BehaviorRelay<Bool>(value: true)
     let isVisibleSpinner = BehaviorRelay<Bool>(value: true)
     let errorMessage = BehaviorRelay<String?>(value: nil)
+    let isRefreshing = BehaviorRelay<Bool>(value: false)
     
     init(employeeService: EmployeeService) {
         self.employeeService = employeeService
@@ -37,6 +38,11 @@ class MainViewModel {
     func searchHandler(_ query: String) {
         cachedQuery = query
         generateSections()
+    }
+    
+    func refreshData() {
+        isRefreshing.accept(true)
+        fetchEmployees()
     }
     
     private func fetchEmployees() {
@@ -57,6 +63,7 @@ class MainViewModel {
     
     private func succesHundler(_ employees: [EmployeeModel]) {
         isVisibleSpinner.accept(false)
+        isRefreshing.accept(false)
         cachedEmployees = employees.sortedByName()
         generateSections()
     }
@@ -64,8 +71,9 @@ class MainViewModel {
     private func errorHandler(_ error: Error) {
         let localizedError = error as? LocalizedError
         let textError = localizedError?.errorDescription ?? error.localizedDescription
-        self.errorMessage.accept(textError)
-        self.isVisibleSpinner.accept(false)
+        errorMessage.accept(textError)
+        isVisibleSpinner.accept(false)
+        isRefreshing.accept(false)
     }
     
     private func generateSections() {

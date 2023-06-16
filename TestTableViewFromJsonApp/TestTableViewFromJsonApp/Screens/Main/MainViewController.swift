@@ -20,6 +20,7 @@ class MainViewController: UIViewController, XibLoadable {
     @IBOutlet weak var spinnerActivity: UIActivityIndicatorView!
     
     private let disposeBag = DisposeBag()
+    private let refreshControl = UIRefreshControl()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,10 +31,11 @@ class MainViewController: UIViewController, XibLoadable {
     
     private func configureTableView() {
         tableView.registerCell(EmployeeTableCell.self)
+        tableView.refreshControl = refreshControl
     }
     
     private func bindViewModel() {
-        guard let viewModel = viewModel else { return }
+        guard let viewModel else { return }
         
         let dataSource = makeDataSource()
         
@@ -61,6 +63,10 @@ class MainViewController: UIViewController, XibLoadable {
             guard let self, let error else { return }
             self.showErrorAlert(with: error)
         }.disposed(by: disposeBag)
+        
+        viewModel.isRefreshing
+            .bind(to: refreshControl.rx.isRefreshing)
+            .disposed(by: disposeBag)
         
         setupUserInteraction(with: viewModel)
     }
@@ -105,10 +111,11 @@ class MainViewController: UIViewController, XibLoadable {
             .disposed(by: disposeBag)
         
         navigationItem.rightBarButtonItem?.rx.tap
-            .subscribe(onNext: { [weak self] _ in
-                guard let self else { return }
-                self.viewModel?.tapShowOrHideButton()
-            })
+            .subscribe(onNext: viewModel.tapShowOrHideButton)
+            .disposed(by: disposeBag)
+        
+        refreshControl.rx.controlEvent(.allEvents)
+            .subscribe(onNext: viewModel.refreshData)
             .disposed(by: disposeBag)
     }
     

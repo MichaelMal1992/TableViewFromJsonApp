@@ -34,7 +34,7 @@ struct Constants {
     }
     
     struct Number {
-        static let debounceMiliseconds = 500
+        static let debounceMiliseconds = 300
     }
     
     struct Alert {

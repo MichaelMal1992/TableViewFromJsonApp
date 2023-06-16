@@ -9,9 +9,9 @@ import UIKit
 import RxSwift
 
 class MainCoordinator: Coordinator {
+    var parentCoordinator: Coordinator? = nil
     var childCoordinators = [Coordinator]()
     var navigationController: UINavigationController
-    var disposeBag = DisposeBag()
     
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
@@ -25,11 +25,11 @@ class MainCoordinator: Coordinator {
         navigationController.pushViewController(vc, animated: true)
     }
     
-    func goToDetails(with employee: EmployeeModel) { }
-    
-    func didFinish(_ child: Coordinator?) {
-        guard let child, let index = childCoordinators.firstIndex(where: { $0 === child }) else { return }
-        childCoordinators.remove(at: index)
+    func goToDetails(with employee: EmployeeModel) {
+        let child = DetailsCoordinator(navigationController: navigationController, model: employee)
+        childCoordinators.append(child)
+        child.parentCoordinator = self
+        child.start()
     }
     
 }
