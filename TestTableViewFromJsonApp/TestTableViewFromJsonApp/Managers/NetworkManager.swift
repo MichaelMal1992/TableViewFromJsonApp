@@ -10,9 +10,10 @@ import Foundation
 class NetworkManager {
     static let shared = NetworkManager()
     private init() {}
-
-    func fetchData<T: Decodable>(from url: URL) async -> Result<T, NetworkError> {
+    
+    func fetchData<T: Decodable>(from url: URL?) async -> Result<T, NetworkError> {
         do {
+            guard let url else { return .failure(.invalidUrl) }
             let (data, response) = try await URLSession.shared.data(from: url)
             if let error = statusCodeHandler(from: response) { return .failure(error) }
             let decodedData = try JSONDecoder().decode(T.self, from: data)
@@ -39,17 +40,20 @@ class NetworkManager {
     }
 }
 
-enum NetworkError: Error {
+enum NetworkError: LocalizedError {
     case invalidResponse
+    case invalidUrl
     case clientError(Int)
     case serverError(Int)
     case invalidStatus(Int)
     case unexpectedError(String)
     
-    var message: String {
+    var errorDescription: String? {
         switch self {
         case .invalidResponse:
             return Constants.NetworkErrorMessage.invalidResponse
+        case .invalidUrl:
+            return Constants.NetworkErrorMessage.invalidUrl
         case .clientError(let statusCode):
             return Constants.NetworkErrorMessage.clientError(statusCode)
         case .serverError(let statusCode):
