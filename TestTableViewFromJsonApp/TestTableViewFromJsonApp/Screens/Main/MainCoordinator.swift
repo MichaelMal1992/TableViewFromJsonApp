@@ -8,8 +8,8 @@
 import UIKit
 import RxSwift
 
-class MainCoordinator: Coordinator {
-    var parentCoordinator: Coordinator? = nil
+final class MainCoordinator: Coordinator {
+    weak var parentCoordinator: Coordinator? = nil
     var childCoordinators = [Coordinator]()
     var navigationController: UINavigationController
     

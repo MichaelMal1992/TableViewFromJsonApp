@@ -10,14 +10,14 @@ import RxSwift
 import RxCocoa
 import RxDataSources
 
-class MainViewController: UIViewController, XibLoadable {
+final class MainViewController: UIViewController, XibLoadable {
     var viewModel: MainViewModel?
     var coordinator: MainCoordinator?
     
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var searchBar: UISearchBar!
-    @IBOutlet weak var noDataLabel: UILabel!
-    @IBOutlet weak var spinnerActivity: UIActivityIndicatorView!
+    @IBOutlet private weak var tableView: UITableView!
+    @IBOutlet private weak var searchBar: UISearchBar!
+    @IBOutlet private weak var noDataLabel: UILabel!
+    @IBOutlet private weak var spinnerActivity: UIActivityIndicatorView!
     
     private let disposeBag = DisposeBag()
     private let refreshControl = UIRefreshControl()
@@ -125,7 +125,7 @@ class MainViewController: UIViewController, XibLoadable {
         navigationItem.title = Constants.AppBar.employeesTitle
     }
     
-    func showErrorAlert(with message: String) {
+    private func showErrorAlert(with message: String) {
         let title = Constants.Alert.errorTitle
         let actionTitle = Constants.Alert.okTitle.uppercased()
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)

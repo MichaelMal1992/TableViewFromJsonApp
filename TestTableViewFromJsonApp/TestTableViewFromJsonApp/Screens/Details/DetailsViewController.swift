@@ -8,10 +8,10 @@
 import UIKit
 import RxSwift
 
-class DetailsViewController: UIViewController, XibLoadable {
-    @IBOutlet weak var idLabel: UILabel!
-    @IBOutlet weak var nameLabel: UILabel!
-    @IBOutlet weak var genderLabel: UILabel!
+final class DetailsViewController: UIViewController, XibLoadable {
+    @IBOutlet private weak var idLabel: UILabel!
+    @IBOutlet private weak var nameLabel: UILabel!
+    @IBOutlet private weak var genderLabel: UILabel!
     
     var viewModel: DetailsViewModel?
     var coordinator: DetailsCoordinator?
