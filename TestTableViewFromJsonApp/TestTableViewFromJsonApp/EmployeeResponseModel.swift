@@ -11,20 +11,20 @@ struct EmployeeResponseModel: Codable {
     let data: [EmployeeModel]?
 }
 
-struct EmployeeModel: Codable {
+struct EmployeeModel: Codable, CoreDataConvertible {
     let id: Int?
     let name: String?
     let gender: Gender?
     
     init?(from entity: Employee) {
-        self.id = Int(entity.id)
+        self.id = entity.id.flatMap { Int($0) }
         self.name = entity.name
         self.gender = Gender(rawValue: entity.gender ?? "")
     }
     
     func toEntity(in context: NSManagedObjectContext) -> Employee {
         let employeeEntity = Employee(context: context)
-        employeeEntity.id = id.map { Int16($0) } ?? 0
+        employeeEntity.id = id.flatMap { String($0) }
         employeeEntity.name = name
         employeeEntity.gender = gender?.rawValue
         return employeeEntity

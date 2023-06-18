@@ -8,6 +8,18 @@
 import RxSwift
 import CoreData
 
+protocol CoreDataConvertible {
+    associatedtype Entity: NSManagedObject
+    init?(from entity: Entity)
+    func toEntity(in context: NSManagedObjectContext) -> Entity
+}
+
+protocol CoreDataStorageProtocol {
+    associatedtype Model
+    func fetchLocalData() -> [Model]
+    func saveToLocal(_ models: [Model])
+}
+
 final class CoreDataStorageManager {
     
     static let shared = CoreDataStorageManager()
@@ -28,13 +40,13 @@ final class CoreDataStorageManager {
         return persistentContainer.viewContext
     }
     
-    func store<T: NSManagedObject>(type: T.Type) -> CoreDataStore<T> {
-        return CoreDataStore<T>(context: context)
+    func storage<T, U> (_ entityType: T.Type, _ modelType: U.Type) -> CoreDataStorage<T, U> {
+        return CoreDataStorage<T, U>(context: context)
     }
     
 }
 
-final class CoreDataStore<T: NSManagedObject>: DataStore {
+final class CoreDataStorage<T: NSManagedObject, U>: CoreDataStorageProtocol where U: Codable, U: CoreDataConvertible, U.Entity == T {
     
     private let context: NSManagedObjectContext
     
@@ -42,72 +54,35 @@ final class CoreDataStore<T: NSManagedObject>: DataStore {
         self.context = context
     }
     
-    func fetch() -> Observable<[T]> {
-        return fetchRequest()
-    }
-    
-    func save(_ object: T) -> Observable<Void> {
-        return saveRequest()
-    }
-    
-    func delete(_ object: T) -> Observable<Void> {
-        context.delete(object)
-        return saveRequest()
-    }
-    
-    private func fetchRequest() -> Observable<[T]> {
-        return Observable.create { [weak self] observer in
-            guard let self else {
-                observer.onError(NSError())
-                return Disposables.create()
-            }
-            
-            let request = NSFetchRequest<T>(entityName: String(describing: T.self))
-            self.tryFetch(request: request, observer: observer)
-            
-            return Disposables.create()
-        }
-    }
-    
-    private func saveRequest() -> Observable<Void> {
-        return Observable.create { [weak self] observer in
-            guard let self else {
-                observer.onError(NSError())
-                return Disposables.create()
-            }
-            
-            guard self.context.hasChanges else {
-                observer.onNext(())
-                observer.onCompleted()
-                return Disposables.create()
-            }
-            
-            self.trySave(observer: observer)
-            
-            return Disposables.create()
-        }
-    }
-    
-    private func tryFetch(request: NSFetchRequest<T>, observer: AnyObserver<[T]>) {
+    func fetchLocalData() -> [U] {
+        let request = NSFetchRequest<T>(entityName: String(describing: T.self))
+        
         do {
-            let objects = try context.fetch(request)
-            observer.onNext(objects)
-            observer.onCompleted()
+            let entities = try context.fetch(request)
+            return entities.compactMap { U(from: $0) }
         } catch {
-            observer.onError(error)
+            print("Failed to fetch \(T.self): \(error)")
+            return []
         }
     }
     
-    private func trySave(observer: AnyObserver<Void>) {
-        do {
-            try context.save()
-            observer.onNext(())
-            observer.onCompleted()
-        } catch {
-            observer.onError(error)
-        }
+    func saveToLocal(_ models: [U]) {
+        let currentEntities = fetchLocalData()
+        guard currentEntities.isEmpty else { return }
+        _ = models.compactMap({ $0.toEntity(in: context) })
+        trySaveContext()
     }
     
+    private func trySaveContext() {
+        context.performAndWait {
+            guard context.hasChanges else { return }
+            do {
+                try context.save()
+            } catch {
+                print("Failed to save \(String(describing: T.self)): \(error)")
+            }
+        }
+    }
 }
 
 

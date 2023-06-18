@@ -46,18 +46,14 @@ final class MainViewModel {
     
     private func fetchEmployees() {
         employeeService.fetchFromRemote()
-            .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
-            .observe(on: MainScheduler.instance)
             .subscribe(
-                onNext: { [weak self] employees in
+                onSuccess: { [weak self] employees in
                     guard let self else { return }
-                    self.succesHundler(employees)
-                },
-                onError: { [weak self] error in
+                    self.succesHundler(employees)},
+                onFailure: { [weak self] error in
                     guard let self else { return }
                     self.errorHandler(error)
-                }
-            ).disposed(by: disposeBag)
+                }).disposed(by: disposeBag)
     }
     
     private func succesHundler(_ employees: [EmployeeModel]) {
@@ -75,19 +71,13 @@ final class MainViewModel {
     }
     
     private func generateSections() {
-        let localObservables = employeeService.fetchFromLocal()
-        Observable
-            .merge(localObservables)
-            .observe(on: MainScheduler.instance)
-            .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .background))
-            .subscribe(onNext: { [weak self] employees in
-                guard let self else { return }
-                let filteredEmployees = employees.filtered(withQuery: self.cachedQuery)
-                let sections = self.isButtonTapped ? self.generateSingleSection(filteredEmployees) : self.generateGroupedSections(filteredEmployees)
-                self.sections.accept(sections)
-                self.isHiddenNoDataLabel.accept(!filteredEmployees.isEmpty)
-                
-            }).disposed(by: disposeBag)
+        let models = employeeService.fetchFromLocal().filtered(withQuery: cachedQuery)
+        let sections = isButtonTapped
+        ? generateSingleSection(models)
+        : generateGroupedSections(models)
+        self.sections.accept(sections)
+        isHiddenNoDataLabel.accept(!models.isEmpty)
+        
     }
     
     private func generateSingleSection(_ employees: [EmployeeModel]) -> [SectionModel] {

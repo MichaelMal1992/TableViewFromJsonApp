@@ -5,7 +5,7 @@
 //  Created by Mikhail Malaschenko on 15.06.23.
 //
 
-import Foundation
+import RxSwift
 
 final class NetworkManager {
     static let shared = NetworkManager()

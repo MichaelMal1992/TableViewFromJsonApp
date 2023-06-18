@@ -10,8 +10,8 @@ import RxSwift
 
 protocol DataStore {
     associatedtype T
-    func fetch() -> Observable<[T]>
-    func save(_ object: T) -> Observable<Void>
-    func delete(_ object: T) -> Observable<Void>
+    func fetch() -> [T]
+    func save(_ objects: [T])
+    func delete(_ object: T)
 }
 
