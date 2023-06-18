@@ -40,31 +40,38 @@ final class MainViewController: UIViewController, XibLoadable {
         let dataSource = makeDataSource()
         
         viewModel.appBarItemTitle
-            .bind { [weak self] title in
-                guard let self else { return }
-                self.navigationItem.rightBarButtonItem?.title = title
+            .observe(on: MainScheduler.instance)
+            .withUnretained(self)
+            .bind { sSelf, title in
+                sSelf.navigationItem.rightBarButtonItem?.title = title
             }
             .disposed(by: disposeBag)
         
         
         viewModel.sections
+            .observe(on: MainScheduler.instance)
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
         viewModel.isHiddenNoDataLabel
+            .observe(on: MainScheduler.instance)
             .bind(to: noDataLabel.rx.isHidden)
             .disposed(by: disposeBag)
         
         viewModel.isVisibleSpinner
+            .observe(on: MainScheduler.instance)
             .bind(to: spinnerActivity.rx.isAnimating)
             .disposed(by: disposeBag)
         
-        viewModel.errorMessage.bind { [weak self] error in
-            guard let self, let error else { return }
-            self.showErrorAlert(with: error)
-        }.disposed(by: disposeBag)
+        viewModel.errorMessage
+            .observe(on: MainScheduler.instance)
+            .bind { [weak self] error in
+                guard let self, let error else { return }
+                self.showErrorAlert(with: error)
+            }.disposed(by: disposeBag)
         
         viewModel.isRefreshing
+            .observe(on: MainScheduler.instance)
             .bind(to: refreshControl.rx.isRefreshing)
             .disposed(by: disposeBag)
         
@@ -85,13 +92,14 @@ final class MainViewController: UIViewController, XibLoadable {
     
     private func setupUserInteraction(with viewModel: MainViewModel) {
         tableView.rx.modelSelected(EmployeeModel.self)
-            .subscribe(onNext: { [weak self] employee in
-                guard let self else { return }
-                self.coordinator?.goToDetails(with: employee)
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self, onNext: { sself, employee in
+                sself.coordinator?.goToDetails(with: employee)
             })
             .disposed(by: disposeBag)
         
         searchBar.rx.cancelButtonClicked
+            .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] _ in
                 guard let self else { return }
                 self.searchBar.resignFirstResponder()
@@ -99,22 +107,26 @@ final class MainViewController: UIViewController, XibLoadable {
             .disposed(by: disposeBag)
         
         searchBar.rx.searchButtonClicked
+            .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] _ in
                 guard let self else { return }
                 self.searchBar.resignFirstResponder()
             }).disposed(by: disposeBag)
         
         searchBar.rx.text
-            .orEmpty.debounce(.milliseconds(Constants.Number.debounceMiliseconds), scheduler: MainScheduler.instance)
+            .orEmpty
+            .debounce(.milliseconds(Constants.Number.debounceMiliseconds), scheduler: MainScheduler.instance)
             .distinctUntilChanged()
             .subscribe(onNext: viewModel.searchHandler)
             .disposed(by: disposeBag)
         
         navigationItem.rightBarButtonItem?.rx.tap
+            .observe(on: MainScheduler.instance)
             .subscribe(onNext: viewModel.tapShowOrHideButton)
             .disposed(by: disposeBag)
         
         refreshControl.rx.controlEvent(.allEvents)
+            .observe(on: MainScheduler.instance)
             .subscribe(onNext: viewModel.refreshData)
             .disposed(by: disposeBag)
     }
