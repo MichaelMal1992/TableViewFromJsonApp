@@ -7,10 +7,10 @@
 
 import CoreData
 
-@objc(Employee)
-public class Employee: NSManagedObject {
-    
-    @NSManaged public var id: NSNumber?
-    @NSManaged public var name: String?
-    @NSManaged public var gender: String?
-}
+//@objc(Employee)
+//public class Employee: NSManagedObject {
+//    
+//    @NSManaged public var id: NSNumber?
+//    @NSManaged public var name: String?
+//    @NSManaged public var gender: String?
+//}

@@ -17,14 +17,14 @@ struct EmployeeModel: Codable {
     let gender: Gender?
     
     init?(from entity: Employee) {
-        self.id = entity.id as? Int
+        self.id = Int(entity.id)
         self.name = entity.name
         self.gender = Gender(rawValue: entity.gender ?? "")
     }
     
     func toEntity(in context: NSManagedObjectContext) -> Employee {
         let employeeEntity = Employee(context: context)
-        employeeEntity.id = id.map { NSNumber(value: $0) }
+        employeeEntity.id = id.map { Int16($0) } ?? 0
         employeeEntity.name = name
         employeeEntity.gender = gender?.rawValue
         return employeeEntity
