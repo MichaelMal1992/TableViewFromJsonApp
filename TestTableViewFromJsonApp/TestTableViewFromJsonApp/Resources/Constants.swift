@@ -41,4 +41,8 @@ struct Constants {
         static let errorTitle = "Error"
         static let okTitle = "Ok"
     }
+    
+    struct CoreData {
+        static let name = "AppCoreData"
+    }
 }

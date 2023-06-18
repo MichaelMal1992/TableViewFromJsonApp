@@ -10,11 +10,10 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-class MainViewModel {
+final class MainViewModel {
     private let disposeBag = DisposeBag()
     private let employeeService: EmployeeService
     private var isButtonTapped = false
-    private var cachedEmployees = [EmployeeModel]()
     private var cachedQuery: String?
     
     let sections = BehaviorRelay<[SectionModel]>(value: [])
@@ -46,7 +45,7 @@ class MainViewModel {
     }
     
     private func fetchEmployees() {
-        employeeService.fetchEmployees()
+        employeeService.fetchFromRemote()
             .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
             .observe(on: MainScheduler.instance)
             .subscribe(
@@ -64,7 +63,6 @@ class MainViewModel {
     private func succesHundler(_ employees: [EmployeeModel]) {
         isVisibleSpinner.accept(false)
         isRefreshing.accept(false)
-        cachedEmployees = employees.sortedByName()
         generateSections()
     }
     
@@ -77,16 +75,19 @@ class MainViewModel {
     }
     
     private func generateSections() {
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self else { return }
-            let query = self.cachedQuery;
-            let filteredEmployees = self.cachedEmployees.filtered(withQuery: query)
-            let sections = self.isButtonTapped ? self.generateSingleSection(filteredEmployees) : self.generateGroupedSections(filteredEmployees)
-            DispatchQueue.main.async {
+        let localObservables = employeeService.fetchFromLocal()
+        Observable
+            .merge(localObservables)
+            .observe(on: MainScheduler.instance)
+            .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .background))
+            .subscribe(onNext: { [weak self] employees in
+                guard let self else { return }
+                let filteredEmployees = employees.filtered(withQuery: self.cachedQuery)
+                let sections = self.isButtonTapped ? self.generateSingleSection(filteredEmployees) : self.generateGroupedSections(filteredEmployees)
                 self.sections.accept(sections)
                 self.isHiddenNoDataLabel.accept(!filteredEmployees.isEmpty)
-            }
-        }
+                
+            }).disposed(by: disposeBag)
     }
     
     private func generateSingleSection(_ employees: [EmployeeModel]) -> [SectionModel] {

@@ -7,7 +7,7 @@
 
 import UIKit
 
-class EmployeeTableCell: UITableViewCell, XibLoadable {
+final class EmployeeTableCell: UITableViewCell, XibLoadable {
     @IBOutlet weak var nameLabel: UILabel!
 }
 

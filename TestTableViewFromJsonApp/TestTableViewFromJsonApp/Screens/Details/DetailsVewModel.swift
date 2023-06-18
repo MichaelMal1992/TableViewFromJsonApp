@@ -8,7 +8,7 @@
 import RxSwift
 import RxRelay
 
-class DetailsViewModel {
+final class DetailsViewModel {
     private let dispose = DisposeBag()
     
     let model: BehaviorRelay<EmployeeModel>
