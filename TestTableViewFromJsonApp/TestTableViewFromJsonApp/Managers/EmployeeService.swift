@@ -12,11 +12,11 @@ typealias EmployeeResult = Result<EmployeeResponseModel?, NetworkError>
 final class EmployeeService {
     private let networkManager = NetworkManager.shared
     private let context = CoreDataStorageManager.shared.context
-    private let storage = CoreDataStorageManager.shared.storage(Employee.self, EmployeeModel.self)
+    private let storage: CoreDataStorage<Employee, EmployeeModel> = CoreDataStorageManager.shared.storage()
     
     private let disposeBag = DisposeBag()
     
-    private var single: Single<[EmployeeModel]> {
+    func fetchFromRemote() -> Single<[EmployeeModel]> {
         return Single.create { [weak self] single in
             guard let self else { return Disposables.create() }
             let url = Constants.Url.loadEmployees
@@ -26,7 +26,6 @@ final class EmployeeService {
                 case .success(let data):
                     let employees = data?.data ?? []
                     single(.success(employees))
-                    self.saveToLocal(employees)
                 case.failure(let error):
                     single(.failure(error))
                 }
@@ -35,22 +34,15 @@ final class EmployeeService {
         }
     }
     
-    func fetchFromRemote() -> Single<[EmployeeModel]> {
-        return single
-            .subscribe(on: MainScheduler.instance)
-            .observe(on: MainScheduler.instance)
-    }
-    
-    func saveToLocal(_ models: [EmployeeModel]) {
-        storage.saveToLocal(models)
+    func updateLocal(_ models: [EmployeeModel]) {
+        storage.addAll(models)
     }
     
     func fetchFromLocal() -> [EmployeeModel] {
-        storage.fetchLocalData()
+        storage.getAll()
     }
     
     func deleteFromLocal(_ model: EmployeeModel) {
-        //        let entity = model.toEntity(in: context)
-        //        store.delete(entity)
+        storage.remove(model)
     }
 }

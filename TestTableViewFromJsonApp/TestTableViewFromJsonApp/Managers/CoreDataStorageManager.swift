@@ -11,17 +11,20 @@ import CoreData
 protocol CoreDataConvertible {
     associatedtype Entity: NSManagedObject
     init?(from entity: Entity)
+    var uniqueId: String? { get }
     func toEntity(in context: NSManagedObjectContext) -> Entity
 }
 
 protocol CoreDataStorageProtocol {
     associatedtype Model
-    func fetchLocalData() -> [Model]
-    func saveToLocal(_ models: [Model])
+    func getAll() -> [Model]
+    func addAll(_ models: [Model])
+    func removeAll()
+    func add(_ model: Model)
+    func remove(_ model: Model)
 }
 
 final class CoreDataStorageManager {
-    
     static let shared = CoreDataStorageManager()
     
     private init() {}
@@ -40,13 +43,13 @@ final class CoreDataStorageManager {
         return persistentContainer.viewContext
     }
     
-    func storage<T, U> (_ entityType: T.Type, _ modelType: U.Type) -> CoreDataStorage<T, U> {
+    func storage<T, U>() -> CoreDataStorage<T, U> {
         return CoreDataStorage<T, U>(context: context)
     }
     
 }
 
-final class CoreDataStorage<T: NSManagedObject, U>: CoreDataStorageProtocol where U: Codable, U: CoreDataConvertible, U.Entity == T {
+final class CoreDataStorage<T: NSManagedObject, U>: CoreDataStorageProtocol where U: CoreDataConvertible, U.Entity == T {
     
     private let context: NSManagedObjectContext
     
@@ -54,26 +57,79 @@ final class CoreDataStorage<T: NSManagedObject, U>: CoreDataStorageProtocol wher
         self.context = context
     }
     
-    func fetchLocalData() -> [U] {
-        let request = NSFetchRequest<T>(entityName: String(describing: T.self))
-        
-        do {
-            let entities = try context.fetch(request)
-            return entities.compactMap { U(from: $0) }
-        } catch {
-            print("Failed to fetch \(T.self): \(error)")
-            return []
-        }
+    func getAll() -> [U] {
+        return getAllEntites().compactMap { U(from: $0) }
     }
     
-    func saveToLocal(_ models: [U]) {
-        let currentEntities = fetchLocalData()
-        guard currentEntities.isEmpty else { return }
-        _ = models.compactMap({ $0.toEntity(in: context) })
+    func addAll(_ models: [U]) {
+        models.forEach(addEntity)
         trySaveContext()
     }
     
-    private func trySaveContext() {
+    func add(_ model: U) {
+        addEntity(model)
+        trySaveContext()
+    }
+    
+    func removeAll() {
+        deleteAllEntities()
+        trySaveContext()
+    }
+    
+    func remove(_ model: U) {
+        findEntities(from: model).forEach(context.delete)
+        trySaveContext()
+    }
+}
+
+private extension CoreDataStorage {
+    func getAllEntites() -> [T] {
+        let request = NSFetchRequest<T>(entityName: String(describing: T.self))
+        var result = [T]()
+        context.performAndWait {
+            do {
+                let entities = try context.fetch(request)
+                result = entities
+            } catch {
+                print("Failed to fetch \(T.self): \(error)")
+            }
+        }
+        return result
+    }
+    
+    func findEntities(from model: U) -> [T] {
+        let request = NSFetchRequest<T>(entityName: String(describing: T.self))
+        request.predicate = NSPredicate(format: "uniqueId == %@", model.uniqueId ?? "")
+        var result = [T]()
+        context.performAndWait {
+            do {
+                let entity = try context.fetch(request)
+                result = entity
+            } catch {
+                print("Failed to find \(String(describing: T.self)): \(error)")
+            }
+        }
+        return result
+    }
+    
+    func addEntity(_ model: U) {
+        guard findEntities(from: model).isEmpty else { return }
+        context.performAndWait { _ = model.toEntity(in: context) }
+    }
+    
+    func deleteAllEntities() {
+        context.performAndWait {
+            let request = T.fetchRequest()
+            let deleteRequest = NSBatchDeleteRequest(fetchRequest: request)
+            do {
+                try context.execute(deleteRequest)
+            } catch {
+                print("Failed to delete all \(String(describing: T.self)): \(error)")
+            }
+        }
+    }
+    
+    func trySaveContext() {
         context.performAndWait {
             guard context.hasChanges else { return }
             do {

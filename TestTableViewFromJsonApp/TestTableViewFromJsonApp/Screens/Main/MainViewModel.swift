@@ -40,6 +40,7 @@ final class MainViewModel {
     }
     
     func refreshData() {
+        guard !isRefreshing.value else { return }
         isRefreshing.accept(true)
         fetchEmployees()
     }
@@ -57,6 +58,7 @@ final class MainViewModel {
     }
     
     private func succesHundler(_ employees: [EmployeeModel]) {
+        employeeService.updateLocal(employees)
         isVisibleSpinner.accept(false)
         isRefreshing.accept(false)
         generateSections()

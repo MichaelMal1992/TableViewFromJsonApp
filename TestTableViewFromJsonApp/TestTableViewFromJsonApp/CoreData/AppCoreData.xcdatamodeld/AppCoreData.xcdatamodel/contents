@@ -4,5 +4,6 @@
         <attribute name="gender" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="uniqueId" attributeType="String"/>
     </entity>
 </model>
