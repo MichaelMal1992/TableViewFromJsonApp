@@ -5,18 +5,15 @@
 //  Created by Mikhail Malaschenko on 16.06.23.
 //
 
-import RxSwift
-import RxRelay
+import Foundation
 
-final class DetailsViewModel {
-    private let dispose = DisposeBag()
+final class DetailsViewModel: AssociatedViewModel {
     
-    let model: BehaviorRelay<EmployeeModel>
-    private let _model: EmployeeModel
+    let model: EmployeeModel?
     
-    init(model: EmployeeModel) {
-        self._model = model
-        self.model = BehaviorRelay(value: model)
+    init(model: EmployeeModel?) {
+        self.model = model
     }
     
+    func loadData() { }
 }

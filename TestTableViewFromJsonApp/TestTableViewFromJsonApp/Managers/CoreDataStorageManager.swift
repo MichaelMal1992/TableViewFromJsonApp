@@ -39,13 +39,9 @@ final class CoreDataStorageManager {
         return container
     }()
     
-    var context: NSManagedObjectContext {
-        return persistentContainer.viewContext
-    }
+    var context: NSManagedObjectContext { persistentContainer.viewContext }
     
-    func storage<T, U>() -> CoreDataStorage<T, U> {
-        return CoreDataStorage<T, U>(context: context)
-    }
+    func storage<T, U>() -> CoreDataStorage<T, U> { CoreDataStorage<T, U>(context: context) }
     
 }
 
@@ -57,9 +53,7 @@ final class CoreDataStorage<T: NSManagedObject, U>: CoreDataStorageProtocol wher
         self.context = context
     }
     
-    func getAll() -> [U] {
-        return getAllEntites().compactMap { U(from: $0) }
-    }
+    func getAll() -> [U] { getAllEntites().compactMap { U(from: $0) } }
     
     func addAll(_ models: [U]) {
         models.forEach(addEntity)

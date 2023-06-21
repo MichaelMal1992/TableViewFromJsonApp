@@ -8,37 +8,46 @@
 import UIKit
 import RxSwift
 
-final class DetailsViewController: UIViewController, XibLoadable {
+final class DetailsViewController: UIViewController, ConfigurableViewController {
     @IBOutlet private weak var idLabel: UILabel!
     @IBOutlet private weak var nameLabel: UILabel!
     @IBOutlet private weak var genderLabel: UILabel!
     
-    var viewModel: DetailsViewModel?
-    var coordinator: DetailsCoordinator?
+    private let coordinator: DetailsCoordinator
+    private let viewModel: DetailsViewModel
     
-    private let disposeBag = DisposeBag()
+    init(coordinator: DetailsCoordinator, viewModel: DetailsViewModel) {
+        self.coordinator = coordinator
+        self.viewModel = viewModel
+        super.init(nibName: Self.nibName, bundle: nil)
+        
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        bindViewModel()
+        configure()
         
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        coordinator?.finish()
+        coordinator.parentCoordinator?.finish(coordinator)
     }
     
-    private func bindViewModel() {
-        guard let viewModel else { return }
-        
-        viewModel.model.bind(onNext: { [weak self] model in
-            guard let self else { return }
-            self.idLabel.text = String(describing: model.id)
-            self.nameLabel.text = model.name
-            self.genderLabel.text = model.gender?.rawValue
-            self.navigationItem.title = model.name
-        }).disposed(by: disposeBag)
+    
+}
+
+//MARK: Configure
+extension DetailsViewController {
+    func configure() {
+        idLabel.text = viewModel.model?.id.flatMap(String.init)
+        nameLabel.text = viewModel.model?.name
+        genderLabel.text = viewModel.model?.gender?.rawValue
+        navigationItem.title = viewModel.model?.name
         
     }
 }

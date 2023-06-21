@@ -18,19 +18,10 @@ final class MainCoordinator: Coordinator {
     }
     
     func start() {
-        let vc = MainViewController.instantiate()
         let service = EmployeeService()
-        vc.coordinator = self
-        vc.viewModel = MainViewModel(employeeService: service)
+        let viewModel = MainViewModel(employeeService: service)
+        let vc = MainViewController(coordinator: self, viewModel: viewModel)
         navigationController.pushViewController(vc, animated: true)
     }
     
-    func goToDetails(with employee: EmployeeModel) {
-        let child = DetailsCoordinator(navigationController: navigationController, model: employee)
-        childCoordinators.append(child)
-        child.parentCoordinator = self
-        child.start()
-    }
-    
 }
-

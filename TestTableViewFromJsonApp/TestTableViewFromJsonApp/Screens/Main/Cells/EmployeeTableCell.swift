@@ -8,6 +8,10 @@
 import UIKit
 
 final class EmployeeTableCell: UITableViewCell, XibLoadable {
-    @IBOutlet weak var nameLabel: UILabel!
+    @IBOutlet weak private var nameLabel: UILabel!
+    
+    func setLabel(text: String?) {
+        nameLabel.text = text
+    }
 }
 

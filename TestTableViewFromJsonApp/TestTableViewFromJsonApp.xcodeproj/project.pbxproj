@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		44FF1DEF53CFAF557FB9C6D8 /* Pods_TestTableViewFromJsonApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 062C649B90E1BEEB2A520000 /* Pods_TestTableViewFromJsonApp.framework */; };
+		9031F7172A436ACD00AA068D /* ConfigurableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9031F7162A436ACD00AA068D /* ConfigurableViewController.swift */; };
+		9031F7192A436B2300AA068D /* AssociatedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9031F7182A436B2300AA068D /* AssociatedViewModel.swift */; };
 		90452AB92A3BC64B00452B63 /* EmployeeResponseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90452AB82A3BC64B00452B63 /* EmployeeResponseModel.swift */; };
 		90452ABC2A3BC91C00452B63 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90452ABB2A3BC91C00452B63 /* Coordinator.swift */; };
 		90452ABE2A3BC98E00452B63 /* XibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90452ABD2A3BC98E00452B63 /* XibLoadable.swift */; };
@@ -18,7 +20,6 @@
 		90452ACA2A3BEEC500452B63 /* EmployeeTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 90452AC92A3BEEC500452B63 /* EmployeeTableCell.xib */; };
 		90452ACD2A3BEF6F00452B63 /* EmployeeTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90452ACC2A3BEF6F00452B63 /* EmployeeTableCell.swift */; };
 		90452AD02A3BF4C900452B63 /* UITableView+register.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90452ACF2A3BF4C900452B63 /* UITableView+register.swift */; };
-		90452AD42A3C75FA00452B63 /* Reactive+bind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90452AD32A3C75FA00452B63 /* Reactive+bind.swift */; };
 		90452AD62A3C8F5300452B63 /* Sequence+group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90452AD52A3C8F5300452B63 /* Sequence+group.swift */; };
 		90452AD82A3C961400452B63 /* EmployeeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90452AD72A3C961400452B63 /* EmployeeService.swift */; };
 		907D7E782A3B389700315F16 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 907D7E772A3B389700315F16 /* AppDelegate.swift */; };
@@ -40,6 +41,8 @@
 /* Begin PBXFileReference section */
 		062C649B90E1BEEB2A520000 /* Pods_TestTableViewFromJsonApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TestTableViewFromJsonApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		76BB3714EC712F873824FFCC /* Pods-TestTableViewFromJsonApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TestTableViewFromJsonApp.release.xcconfig"; path = "Target Support Files/Pods-TestTableViewFromJsonApp/Pods-TestTableViewFromJsonApp.release.xcconfig"; sourceTree = "<group>"; };
+		9031F7162A436ACD00AA068D /* ConfigurableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurableViewController.swift; sourceTree = "<group>"; };
+		9031F7182A436B2300AA068D /* AssociatedViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssociatedViewModel.swift; sourceTree = "<group>"; };
 		90452AB82A3BC64B00452B63 /* EmployeeResponseModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeeResponseModel.swift; sourceTree = "<group>"; };
 		90452ABB2A3BC91C00452B63 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
 		90452ABD2A3BC98E00452B63 /* XibLoadable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XibLoadable.swift; sourceTree = "<group>"; };
@@ -50,7 +53,6 @@
 		90452AC92A3BEEC500452B63 /* EmployeeTableCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EmployeeTableCell.xib; sourceTree = "<group>"; };
 		90452ACC2A3BEF6F00452B63 /* EmployeeTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeeTableCell.swift; sourceTree = "<group>"; };
 		90452ACF2A3BF4C900452B63 /* UITableView+register.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+register.swift"; sourceTree = "<group>"; };
-		90452AD32A3C75FA00452B63 /* Reactive+bind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reactive+bind.swift"; sourceTree = "<group>"; };
 		90452AD52A3C8F5300452B63 /* Sequence+group.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+group.swift"; sourceTree = "<group>"; };
 		90452AD72A3C961400452B63 /* EmployeeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeeService.swift; sourceTree = "<group>"; };
 		907D7E742A3B389700315F16 /* TestTableViewFromJsonApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestTableViewFromJsonApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -150,6 +152,8 @@
 				90452ABB2A3BC91C00452B63 /* Coordinator.swift */,
 				90B9AB2F2A3E155200472152 /* DataStore.swift */,
 				90452ABD2A3BC98E00452B63 /* XibLoadable.swift */,
+				9031F7162A436ACD00AA068D /* ConfigurableViewController.swift */,
+				9031F7182A436B2300AA068D /* AssociatedViewModel.swift */,
 			);
 			path = Basic;
 			sourceTree = "<group>";
@@ -183,7 +187,6 @@
 			isa = PBXGroup;
 			children = (
 				90452ACF2A3BF4C900452B63 /* UITableView+register.swift */,
-				90452AD32A3C75FA00452B63 /* Reactive+bind.swift */,
 				90452AD52A3C8F5300452B63 /* Sequence+group.swift */,
 			);
 			path = Extensions;
@@ -234,17 +237,9 @@
 		90B9AB2B2A3E09DB00472152 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
-				90B9AB332A3E31B700472152 /* Models */,
 				90B9AB2C2A3E0B5F00472152 /* AppCoreData.xcdatamodeld */,
 			);
 			path = CoreData;
-			sourceTree = "<group>";
-		};
-		90B9AB332A3E31B700472152 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Models;
 			sourceTree = "<group>";
 		};
 		90E358842A3B53E900776841 /* Managers */ = {
@@ -407,11 +402,12 @@
 				907D7E7A2A3B389700315F16 /* SceneDelegate.swift in Sources */,
 				90B9AB222A3CED3D00472152 /* DetailsViewController.swift in Sources */,
 				90452AC82A3BE64A00452B63 /* SectionModel.swift in Sources */,
+				9031F7192A436B2300AA068D /* AssociatedViewModel.swift in Sources */,
 				90452ACD2A3BEF6F00452B63 /* EmployeeTableCell.swift in Sources */,
+				9031F7172A436ACD00AA068D /* ConfigurableViewController.swift in Sources */,
 				90452AD02A3BF4C900452B63 /* UITableView+register.swift in Sources */,
 				90452ABC2A3BC91C00452B63 /* Coordinator.swift in Sources */,
 				90452AC02A3BCB3400452B63 /* MainViewModel.swift in Sources */,
-				90452AD42A3C75FA00452B63 /* Reactive+bind.swift in Sources */,
 				90452AD62A3C8F5300452B63 /* Sequence+group.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

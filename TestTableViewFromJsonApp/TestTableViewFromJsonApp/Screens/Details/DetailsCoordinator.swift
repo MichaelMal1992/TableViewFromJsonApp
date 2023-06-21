@@ -11,8 +11,12 @@ final class DetailsCoordinator: Coordinator {
     weak var parentCoordinator: Coordinator?
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
-    private let model: EmployeeModel
     
+    private var model: EmployeeModel?
+    
+    init(navigationController: UINavigationController) {
+        self.navigationController = navigationController
+    }
     
     init(navigationController: UINavigationController, model: EmployeeModel) {
         self.navigationController = navigationController
@@ -20,14 +24,9 @@ final class DetailsCoordinator: Coordinator {
     }
     
     func start() {
-        let vc = DetailsViewController.instantiate()
-        vc.coordinator = self
-        vc.viewModel = DetailsViewModel(model: model)
+        let viewModel = DetailsViewModel(model: model)
+        let vc = DetailsViewController(coordinator: self, viewModel: viewModel)
         navigationController.pushViewController(vc, animated: true)
-    }
-    
-    func finish() {
-        parentCoordinator?.didFinish(self)
     }
     
 }

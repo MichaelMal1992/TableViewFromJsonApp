@@ -10,10 +10,7 @@ import RxSwift
 import RxCocoa
 import RxDataSources
 
-final class MainViewController: UIViewController, XibLoadable {
-    var viewModel: MainViewModel?
-    var coordinator: MainCoordinator?
-    
+final class MainViewController: UIViewController, ConfigurableViewController {
     @IBOutlet private weak var tableView: UITableView!
     @IBOutlet private weak var searchBar: UISearchBar!
     @IBOutlet private weak var noDataLabel: UILabel!
@@ -22,67 +19,53 @@ final class MainViewController: UIViewController, XibLoadable {
     private let disposeBag = DisposeBag()
     private let refreshControl = UIRefreshControl()
     
+    private let coordinator: MainCoordinator
+    private let viewModel: MainViewModel
+    
+    init(coordinator: MainCoordinator, viewModel: MainViewModel) {
+        self.coordinator = coordinator
+        self.viewModel = viewModel
+        super.init(nibName: Self.nibName, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNavigationBar()
         configureTableView()
-        bindViewModel()
+        bindingSetup()
+        viewModel.loadData()
     }
     
-    private func configureTableView() {
+}
+
+
+//MARK: Setup
+private extension MainViewController {
+    func configureTableView() {
         tableView.registerCell(EmployeeTableCell.self)
         tableView.refreshControl = refreshControl
     }
     
-    private func bindViewModel() {
-        guard let viewModel else { return }
-        
-        let dataSource = makeDataSource()
-        
-        viewModel.appBarItemTitle
-            .observe(on: MainScheduler.instance)
-            .withUnretained(self)
-            .bind { sSelf, title in
-                sSelf.navigationItem.rightBarButtonItem?.title = title
-            }
-            .disposed(by: disposeBag)
-        
-        
-        viewModel.sections
-            .observe(on: MainScheduler.instance)
-            .bind(to: tableView.rx.items(dataSource: dataSource))
-            .disposed(by: disposeBag)
-        
-        viewModel.isHiddenNoDataLabel
-            .observe(on: MainScheduler.instance)
-            .bind(to: noDataLabel.rx.isHidden)
-            .disposed(by: disposeBag)
-        
-        viewModel.isVisibleSpinner
-            .observe(on: MainScheduler.instance)
-            .bind(to: spinnerActivity.rx.isAnimating)
-            .disposed(by: disposeBag)
-        
-        viewModel.errorMessage
-            .observe(on: MainScheduler.instance)
-            .bind { [weak self] error in
-                guard let self, let error else { return }
-                self.showErrorAlert(with: error)
-            }.disposed(by: disposeBag)
-        
-        viewModel.isRefreshing
-            .observe(on: MainScheduler.instance)
-            .bind(to: refreshControl.rx.isRefreshing)
-            .disposed(by: disposeBag)
-        
-        setupUserInteraction(with: viewModel)
+    func configureNavigationBar() {
+        let item = UIBarButtonItem(title: Constants.AppBar.hide, style: .plain, target: self, action: nil)
+        navigationItem.rightBarButtonItem = item
+        navigationItem.title = Constants.AppBar.employeesTitle
     }
     
-    private func makeDataSource() -> RxTableViewSectionedReloadDataSource<SectionModel> {
+    func bindingSetup() {
+        bindViewModel()
+        bindUserInteractions()
+    }
+    
+    func makeDataSource() -> RxTableViewSectionedReloadDataSource<SectionModel> {
         return RxTableViewSectionedReloadDataSource<SectionModel>(
             configureCell: { _, tableView, indexPath, item in
                 let cell = tableView.dequeueCell(EmployeeTableCell.self, for: indexPath)
-                cell?.nameLabel?.text = item.name
+                cell?.setLabel(text: item.name)
                 return cell ?? UITableViewCell()
             },
             titleForHeaderInSection: { dataSource, sectionIndex in
@@ -90,54 +73,7 @@ final class MainViewController: UIViewController, XibLoadable {
             })
     }
     
-    private func setupUserInteraction(with viewModel: MainViewModel) {
-        tableView.rx.modelSelected(EmployeeModel.self)
-            .observe(on: MainScheduler.instance)
-            .subscribe(with: self, onNext: { sself, employee in
-                sself.coordinator?.goToDetails(with: employee)
-            })
-            .disposed(by: disposeBag)
-        
-        searchBar.rx.cancelButtonClicked
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] _ in
-                guard let self else { return }
-                self.searchBar.resignFirstResponder()
-            })
-            .disposed(by: disposeBag)
-        
-        searchBar.rx.searchButtonClicked
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] _ in
-                guard let self else { return }
-                self.searchBar.resignFirstResponder()
-            }).disposed(by: disposeBag)
-        
-        searchBar.rx.text
-            .orEmpty
-            .debounce(.milliseconds(Constants.Number.debounceMiliseconds), scheduler: MainScheduler.instance)
-            .distinctUntilChanged()
-            .subscribe(onNext: viewModel.searchHandler)
-            .disposed(by: disposeBag)
-        
-        navigationItem.rightBarButtonItem?.rx.tap
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: viewModel.tapShowOrHideButton)
-            .disposed(by: disposeBag)
-        
-        refreshControl.rx.controlEvent(.allEvents)
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: viewModel.refreshData)
-            .disposed(by: disposeBag)
-    }
-    
-    private func configureNavigationBar() {
-        let item = UIBarButtonItem(title: nil, style: .plain, target: self, action: nil)
-        navigationItem.rightBarButtonItem = item
-        navigationItem.title = Constants.AppBar.employeesTitle
-    }
-    
-    private func showErrorAlert(with message: String) {
+    func showErrorAlert(with message: String) {
         let title = Constants.Alert.errorTitle
         let actionTitle = Constants.Alert.okTitle.uppercased()
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -145,4 +81,81 @@ final class MainViewController: UIViewController, XibLoadable {
         present(alert, animated: true, completion: nil)
     }
     
+    func goToDetailsScreen(_ employee: EmployeeModel) {
+        let navController = coordinator.navigationController
+        let childCoordinator = DetailsCoordinator(navigationController: navController, model: employee)
+        coordinator.goNext(childCoordinator)
+    }
+}
+
+
+//MARK: Binding
+private extension MainViewController {
+    func bindViewModel() {
+        viewModel.appBarItemTitle
+            .drive(navigationItem.rightBarButtonItem!.rx.title)
+            .disposed(by: disposeBag)
+        
+        viewModel.sections
+            .drive(tableView.rx.items(dataSource: makeDataSource()))
+            .disposed(by: disposeBag)
+        
+        viewModel.isHiddenNoDataLabel
+            .drive(noDataLabel.rx.isHidden)
+            .disposed(by: disposeBag)
+        
+        viewModel.isVisibleSpinner
+            .drive(spinnerActivity.rx.isAnimating)
+            .disposed(by: disposeBag)
+        
+        viewModel.errorMessage
+            .drive(with: self, onNext: { sself, error in
+                sself.showErrorAlert(with: error)
+            }).disposed(by: disposeBag)
+        
+        
+        viewModel.isRefreshing
+            .drive(refreshControl.rx.isRefreshing)
+            .disposed(by: disposeBag)
+    }
+    
+    func bindUserInteractions() {
+        tableView.rx.modelSelected(EmployeeModel.self)
+            .asDriver()
+            .drive(with: self, onNext: { sself, employee in
+                sself.goToDetailsScreen(employee)
+            })
+            .disposed(by: disposeBag)
+        
+        searchBar.rx.cancelButtonClicked
+            .asDriver()
+            .drive(with: self, onNext: { sself, _ in
+                sself.searchBar.resignFirstResponder()
+            })
+            .disposed(by: disposeBag)
+        
+        searchBar.rx.searchButtonClicked
+            .asDriver()
+            .drive(with: self, onNext: { sself, _ in
+                sself.searchBar.resignFirstResponder()
+            }).disposed(by: disposeBag)
+        
+        searchBar.rx.text
+            .orEmpty
+            .debounce(.milliseconds(Constants.Number.debounceMiliseconds), scheduler: ConcurrentDispatchQueueScheduler.init(qos: .userInteractive))
+            .distinctUntilChanged()
+            .asDriver(onErrorDriveWith: Driver<String>.empty())
+            .drive(onNext: viewModel.searchHandler)
+            .disposed(by: disposeBag)
+        
+        navigationItem.rightBarButtonItem?.rx.tap
+            .asDriver()
+            .drive(onNext: viewModel.tapShowOrHideButton)
+            .disposed(by: disposeBag)
+        
+        refreshControl.rx.controlEvent(.valueChanged)
+            .asDriver()
+            .drive(onNext: viewModel.refreshData)
+            .disposed(by: disposeBag)
+    }
 }

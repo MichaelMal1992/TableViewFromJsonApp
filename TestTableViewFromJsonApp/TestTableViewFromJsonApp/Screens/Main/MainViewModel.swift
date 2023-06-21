@@ -10,22 +10,28 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-final class MainViewModel {
+final class MainViewModel: AssociatedViewModel {
     private let disposeBag = DisposeBag()
     private let employeeService: EmployeeService
     private var isButtonTapped = false
     private var cachedQuery: String?
     
-    let sections = BehaviorRelay<[SectionModel]>(value: [])
-    let appBarItemTitle = BehaviorRelay<String>(value: Constants.AppBar.hide)
-    let isHiddenNoDataLabel = BehaviorRelay<Bool>(value: true)
-    let isVisibleSpinner = BehaviorRelay<Bool>(value: true)
-    let errorMessage = BehaviorRelay<String?>(value: nil)
-    let isRefreshing = BehaviorRelay<Bool>(value: false)
+    private let _sections = PublishRelay<[SectionModel]>()
+    private let _appBarItemTitle = PublishRelay<String>()
+    private let _isHiddenNoDataLabel = PublishRelay<Bool>()
+    private let _isVisibleSpinner = PublishRelay<Bool>()
+    private let _errorMessage = PublishRelay<String>()
+    private let _isRefreshing = PublishRelay<Bool>()
+    
+    var sections: Driver<[SectionModel]> { _sections.asDriver(onErrorDriveWith: Driver.empty()) }
+    var appBarItemTitle: Driver<String> { _appBarItemTitle.asDriver(onErrorDriveWith: Driver.empty()) }
+    var isHiddenNoDataLabel: Driver<Bool> { _isHiddenNoDataLabel.asDriver(onErrorDriveWith: Driver.empty()) }
+    var isVisibleSpinner: Driver<Bool> { _isVisibleSpinner.asDriver(onErrorDriveWith: Driver.empty()) }
+    var errorMessage: Driver<String> { _errorMessage.asDriver(onErrorDriveWith: Driver.empty()) }
+    var isRefreshing: Driver<Bool> { _isRefreshing.asDriver(onErrorDriveWith: Driver.empty()) }
     
     init(employeeService: EmployeeService) {
         self.employeeService = employeeService
-        fetchEmployees()
     }
     
     func tapShowOrHideButton() {
@@ -40,12 +46,11 @@ final class MainViewModel {
     }
     
     func refreshData() {
-        guard !isRefreshing.value else { return }
-        isRefreshing.accept(true)
-        fetchEmployees()
+        _isRefreshing.accept(true)
+        loadData()
     }
     
-    private func fetchEmployees() {
+    func loadData() {
         employeeService.fetchFromRemote()
             .subscribe(
                 onSuccess: { [weak self] employees in
@@ -59,17 +64,17 @@ final class MainViewModel {
     
     private func succesHundler(_ employees: [EmployeeModel]) {
         employeeService.updateLocal(employees)
-        isVisibleSpinner.accept(false)
-        isRefreshing.accept(false)
+        _isVisibleSpinner.accept(false)
+        _isRefreshing.accept(false)
         generateSections()
     }
     
     private func errorHandler(_ error: Error) {
         let localizedError = error as? LocalizedError
         let textError = localizedError?.errorDescription ?? error.localizedDescription
-        errorMessage.accept(textError)
-        isVisibleSpinner.accept(false)
-        isRefreshing.accept(false)
+        _errorMessage.accept(textError)
+        _isVisibleSpinner.accept(false)
+        _isRefreshing.accept(false)
     }
     
     private func generateSections() {
@@ -77,13 +82,13 @@ final class MainViewModel {
         let sections = isButtonTapped
         ? generateSingleSection(models)
         : generateGroupedSections(models)
-        self.sections.accept(sections)
-        isHiddenNoDataLabel.accept(!models.isEmpty)
+        _sections.accept(sections)
+        _isHiddenNoDataLabel.accept(!models.isEmpty)
         
     }
     
     private func generateSingleSection(_ employees: [EmployeeModel]) -> [SectionModel] {
-        return [SectionModel(items: employees)]
+        return [SectionModel(items: employees.sortedByName())]
     }
     
     private func generateGroupedSections(_ employees: [EmployeeModel]) -> [SectionModel] {
@@ -96,7 +101,7 @@ final class MainViewModel {
     
     private func setAppBarItemTitle() {
         let title = isButtonTapped ? Constants.AppBar.show : Constants.AppBar.hide
-        appBarItemTitle.accept(title)
+        _appBarItemTitle.accept(title)
     }
 }
 
